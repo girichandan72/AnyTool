@@ -336,7 +336,7 @@ AnyTool uses a layered configuration system:
 
 ### MCP Configuration
 
-**Path**: `anytool/config/config_mcp.json`
+**Path**: `anytool/config/config_mcp.json` (copy from `config_mcp.json.example`)
 
 **Purpose**: Register MCP servers with connection details. AnyTool automatically discovers tools from all registered servers and makes them available through Smart Tool RAG.
 
@@ -685,7 +685,7 @@ config/
 │
 ├── config_grounding.json           # Backend-specific settings
 ├── config_agents.json              # Agent configurations
-├── config_mcp.json                 # MCP server definitions
+├── config_mcp.json.example         # MCP server definitions (copy to config_mcp.json)
 ├── config_security.json            # Security policies
 └── config_dev.json.example         # Development config template
 ```

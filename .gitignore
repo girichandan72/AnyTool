@@ -26,7 +26,9 @@ build/
 
 # Environment files
 .env
-!.env.example
+
+# MCP files
+anytool/config/config_mcp.json
 
 # Logs
 logs/
