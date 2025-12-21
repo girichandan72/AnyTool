@@ -101,7 +101,8 @@ CRITICAL GUIDELINES:
     @staticmethod
     def visual_analysis(
         tool_name: str,
-        num_screenshots: int
+        num_screenshots: int,
+        task_description: str = ""
     ) -> str:
         """
         Build prompt for visual analysis of screenshots.
@@ -109,13 +110,20 @@ CRITICAL GUIDELINES:
         Args:
             tool_name: Tool name that generated the screenshots
             num_screenshots: Number of screenshots
+            task_description: Original task description for context
         """
         screenshot_text = "screenshot" if num_screenshots == 1 else f"{num_screenshots} screenshots"
         these_text = "this screenshot" if num_screenshots == 1 else "these screenshots"
         
-        return f"""Extract the KNOWLEDGE and INFORMATION from {these_text}. This will be passed to the next iteration so it can continue working with the information (search, analyze, save, etc.). Without this extraction, the visual content would only be viewable by humans and unusable for subsequent operations.
+        task_context = f"""
+**Original Task**: {task_description}
 
-**EXTRACT all visible knowledge content**:
+Focus on extracting information RELEVANT to this task. Prioritize content that helps accomplish the goal.
+""" if task_description else ""
+        
+        return f"""Extract the KNOWLEDGE and INFORMATION from {these_text}. This will be passed to the next iteration so it can continue working with the information (search, analyze, save, etc.). Without this extraction, the visual content would only be viewable by humans and unusable for subsequent operations.
+{task_context}
+**EXTRACT all visible knowledge content** (prioritize task-relevant information):
 1. **Text content**: Articles, documentation, code, messages, descriptions - extract the actual text
 2. **Data points**: Numbers, statistics, measurements, values, percentages - be specific
 3. **List items**: Names, titles, entries in lists/search results/files - list them out
@@ -127,7 +135,7 @@ CRITICAL GUIDELINES:
 - UI design, layout, colors, styling
 - Non-informational visual elements
 
-**Goal**: Extract usable knowledge that enables the next agent to work with this information programmatically. Be SPECIFIC and COMPLETE.
+**Goal**: Extract usable knowledge that enables the next agent to work with this information programmatically. Be SPECIFIC and COMPLETE, but FOCUS on what's relevant to the task.
 
 {screenshot_text.capitalize()} from tool '{tool_name}'"""
     

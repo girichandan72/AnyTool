@@ -112,6 +112,10 @@ class AnyTool:
                     enable_video=self.config.enable_video,
                     agent_name="AnyTool",
                 )
+                # Inject recording_manager to grounding_client for GUI intermediate steps
+                self._grounding_client.recording_manager = self._recording_manager
+                # Register to LLM client for auto-recording tool results
+                self._recording_manager.register_to_llm(self._llm_client)
                 logger.info(f"✓ Recording enabled: {len(self._recording_manager.backends or [])} backends")
             
             agent_config = get_agent_config("GroundingAgent")
@@ -119,13 +123,15 @@ class AnyTool:
                 # Use config file values, fall back to AnyToolConfig defaults
                 max_iterations = agent_config.get("max_iterations", self.config.grounding_max_iterations)
                 backend_scope = agent_config.get("backend_scope", self.config.backend_scope or ["gui", "shell", "mcp", "web", "system"])
+                visual_analysis_timeout = agent_config.get("visual_analysis_timeout", 30.0)
                 # Update config with values from config file
                 self.config.grounding_max_iterations = max_iterations
-                logger.info(f"Loaded GroundingAgent config from config_agents.json (max_iterations={max_iterations})")
+                logger.info(f"Loaded GroundingAgent config from config_agents.json (max_iterations={max_iterations}, visual_analysis_timeout={visual_analysis_timeout}s)")
             else:
                 # Fall back to AnyToolConfig values
                 max_iterations = self.config.grounding_max_iterations
                 backend_scope = self.config.backend_scope or ["gui", "shell", "mcp", "web", "system"]
+                visual_analysis_timeout = 30.0
                 logger.warning(f"config_agents.json not found, using default config (max_iterations={max_iterations})")
             
             self._grounding_agent = GroundingAgent(
@@ -136,6 +142,7 @@ class AnyTool:
                 recording_manager=self._recording_manager,
                 system_prompt=self.config.grounding_system_prompt,
                 max_iterations=max_iterations,
+                visual_analysis_timeout=visual_analysis_timeout,
             )
             logger.info(f"✓ GroundingAgent: {', '.join(backend_scope)}")
             

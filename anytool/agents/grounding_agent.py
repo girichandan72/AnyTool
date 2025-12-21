@@ -68,6 +68,9 @@ class GroundingAgent(BaseAgent):
             logger.error("Grounding Agent: No instruction provided")
             return {"error": "No instruction provided", "status": "error"}
         
+        # Store current instruction for visual analysis context
+        self._current_instruction = instruction
+        
         logger.info(f"Grounding Agent: Processing instruction at step {self.step}")
         
         # Exist workspace files check
@@ -137,11 +140,16 @@ class GroundingAgent(BaseAgent):
                     if not has_tool_calls:
                         logger.warning(f"Iteration {current_iteration} - NO tool calls and NO content (potential infinite loop)")
                 
-                is_complete = GroundingAgentPrompts.TASK_COMPLETE in assistant_content
+                # Check for completion in both assistant content and iteration summary
+                is_complete = (
+                    GroundingAgentPrompts.TASK_COMPLETE in assistant_content or
+                    (llm_summary and GroundingAgentPrompts.TASK_COMPLETE in llm_summary)
+                )
                 
                 if is_complete:
                     # Task is complete - LLM generated completion token
-                    logger.info(f"Task completed at iteration {current_iteration} (LLM generated {GroundingAgentPrompts.TASK_COMPLETE})")
+                    source = "assistant content" if GroundingAgentPrompts.TASK_COMPLETE in assistant_content else "iteration summary"
+                    logger.info(f"Task completed at iteration {current_iteration} (found {GroundingAgentPrompts.TASK_COMPLETE} in {source})")
                     break
                 
                 else:
@@ -401,7 +409,8 @@ class GroundingAgent(BaseAgent):
             
             prompt = GroundingAgentPrompts.visual_analysis(
                 tool_name=tool_name,
-                num_screenshots=num_screenshots
+                num_screenshots=num_screenshots,
+                task_description=getattr(self, '_current_instruction', '')
             )
 
             # Build content with text prompt + all images
@@ -533,12 +542,15 @@ class GroundingAgent(BaseAgent):
         if not workspace_path or not os.path.exists(workspace_path):
             return result
         
+        # Recording system files to exclude from workspace scanning
+        excluded_files = {"metadata.json", "traj.jsonl"}
+        
         try:
             current_time = time.time()
             
             for filename in os.listdir(workspace_path):
                 filepath = os.path.join(workspace_path, filename)
-                if os.path.isfile(filepath):
+                if os.path.isfile(filepath) and filename not in excluded_files:
                     result["files"].append(filename)
                     
                     # Get file stats
@@ -652,7 +664,7 @@ class GroundingAgent(BaseAgent):
         Generate final summary across all iterations for reporting to upper layer.
         """
         final_summary_prompt = {
-            "role": "system",
+            "role": "user",
             "content": GroundingAgentPrompts.final_summary(
                 instruction=instruction,
                 iterations=iterations
@@ -799,7 +811,7 @@ class GroundingAgent(BaseAgent):
             action_type="execute",
             input_data={"instruction": instruction},
             reasoning={
-                "response": result.get("response", "")[:500],
+                "response": result.get("response", ""),
                 "tools_selected": tool_summary,
             },
             output_data={

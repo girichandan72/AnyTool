@@ -90,6 +90,7 @@ class RecordingManager:
         result: Any,
         server_name: Optional[str] = None,
         is_success: bool = True,
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """
         Record tool execution (internal method, called by BaseTool automatically)
@@ -101,6 +102,7 @@ class RecordingManager:
             result: Tool execution result (content or error message)
             server_name: Server name for MCP backend
             is_success: Whether the tool execution was successful (default: True for backward compatibility)
+            metadata: Tool result metadata (e.g. intermediate_steps for GUI)
         """
         if not cls._global_instance or not cls._global_instance._is_started:
             return
@@ -122,15 +124,15 @@ class RecordingManager:
                 self.function = MockFunctionCall(name, arguments)
         
         class MockResult:
-            def __init__(self, content, is_success=True):
+            def __init__(self, content, is_success=True, metadata=None):
                 self.content = content
                 self.is_success = is_success
                 self.is_error = not is_success
                 self.error = content if not is_success else None
-                self.metadata = {}
+                self.metadata = metadata or {}
         
         tool_call = MockToolCall(tool_name, parameters)
-        mock_result = MockResult(result, is_success=is_success)  # Use the passed is_success parameter
+        mock_result = MockResult(result, is_success=is_success, metadata=metadata)
         
         try:
             if backend == "mcp":
@@ -390,13 +392,17 @@ class RecordingManager:
                 )
                 continue
             
+            # Extract metadata for embedding intermediate_steps (GUI)
+            result_metadata = result.metadata if hasattr(result, 'metadata') else None
+            
             await RecordingManager.record_tool_execution(
                 tool_name=tool_call.function.name,
                 backend=backend,
                 parameters=self._parse_arguments(tool_call.function.arguments),
                 result=result.content if hasattr(result, 'content') else str(result),
                 server_name=server_name,
-                is_success=result.is_success if hasattr(result, 'is_success') else True,  # Pass actual success status
+                is_success=result.is_success if hasattr(result, 'is_success') else True,
+                metadata=result_metadata,
             )
 
     async def _record_mcp(self, tool_call, result, server: str):
@@ -458,7 +464,6 @@ class RecordingManager:
                             break
         
         result_str = str(result.content) if result.is_success else str(result.error)
-        result_brief = result_str[:200] + "..." if len(result_str) > 200 else result_str
         
         is_actual_success = result.is_success
         if result.is_success:
@@ -467,16 +472,24 @@ class RecordingManager:
             has_critical_failure = any(pattern in first_200_chars for pattern in critical_failure_patterns)
             is_actual_success = not has_critical_failure
         
+        # Extract intermediate_steps from metadata for embedding in traj.jsonl
+        extra = {}
+        if hasattr(result, 'metadata') and result.metadata:
+            intermediate_steps = result.metadata.get("intermediate_steps")
+            if intermediate_steps:
+                extra["intermediate_steps"] = intermediate_steps
+        
         step_info = await self._recorder.record_step(
             backend="gui",
             tool="gui_agent",
             command=command,
             result={
                 "status": "success" if is_actual_success else "error",
-                "output": result_brief,
+                "output": result_str,
             },
             parameters=parameters,
-            auto_screenshot=self.enable_screenshot
+            auto_screenshot=self.enable_screenshot,
+            extra=extra if extra else None,
         )
         
         step_info["agent_name"] = self.agent_name

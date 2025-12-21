@@ -4,7 +4,8 @@
       "name": "GroundingAgent",
       "class_name": "GroundingAgent",
       "backend_scope": ["gui", "shell", "mcp", "system", "web"],
-      "max_iterations": 15
+      "max_iterations": 15,
+      "visual_analysis_timeout": 60.0
     }
   ]
 }
